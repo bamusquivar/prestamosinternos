@@ -1,0 +1,384 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Préstamos Internos – Tesorería / Inversiones</title>
+  <style>
+    :root {
+      --bg: #e0e5ec;
+      --card: #e0e5ec;
+      --accent: #4CAF50;
+      --accent-soft: #d8f3dc;
+      --text-main: #4a4f5a;
+      --text-soft: #7b808a;
+      --shadow-out: 12px 12px 24px #b8beca, -12px -12px 24px #ffffff;
+      --shadow-inset: inset 6px 6px 12px #c2c7d1, inset -6px -6px 12px #ffffff;
+    }
+    body.dark {
+      --bg: #1f2430;
+      --card: #222835;
+      --accent: #4CAF50;
+      --accent-soft: #163b26;
+      --text-main: #f5f7fb;
+      --text-soft: #9aa2ba;
+      --shadow-out: 12px 12px 24px #151824, -12px -12px 24px #2b3242;
+      --shadow-inset: inset 6px 6px 12px #151824, inset -6px -6px 12px #2b3242;
+    }
+    * { box-sizing: border-box; font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    body {
+      margin: 0; padding: 32px;
+      background: radial-gradient(circle at top left, #ffffff, var(--bg) 45%);
+      color: var(--text-main);
+      display: flex; justify-content: center; align-items: flex-start;
+      min-height: 100vh;
+      transition: background 0.3s ease, color 0.3s ease;
+    }
+    .app-shell {
+      width: 100%; max-width: 1200px;
+      background: var(--card);
+      border-radius: 40px;
+      box-shadow: var(--shadow-out);
+      padding: 22px 26px 26px;
+      transition: box-shadow 0.25s ease, background 0.25s ease;
+    }
+    .app-header {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 16px;
+    }
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .brand-logo {
+      width: 34px; height: 34px; border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, #ffffff, #c3f7cf, #4CAF50);
+      box-shadow: var(--shadow-out);
+    }
+    .brand-title { font-size: 18px; font-weight: 600; letter-spacing: 0.03em; }
+    .brand-sub { font-size: 11px; color: var(--text-soft); }
+    .header-right { display: flex; align-items: center; gap: 12px; }
+    .pill {
+      padding: 6px 14px; border-radius: 999px;
+      background: var(--card); box-shadow: var(--shadow-inset);
+      font-size: 11px; color: var(--text-soft);
+      display: flex; align-items: center; gap: 6px;
+    }
+    .pill-dot {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: var(--accent);
+    }
+    .toggle-dark {
+      width: 46px; height: 24px; border-radius: 999px;
+      background: var(--card); box-shadow: var(--shadow-inset);
+      display: flex; align-items: center; padding: 3px;
+      cursor: pointer; position: relative;
+      transition: background 0.25s ease, box-shadow 0.25s ease;
+    }
+    .toggle-knob {
+      width: 18px; height: 18px; border-radius: 50%;
+      background: linear-gradient(145deg, #ffffff, #cfd5e3);
+      box-shadow: 3px 3px 6px #b8beca, -3px -3px 6px #ffffff;
+      transform: translateX(0);
+      transition: transform 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
+    }
+    body.dark .toggle-knob {
+      background: linear-gradient(145deg, #2b3242, #1c222e);
+      box-shadow: 3px 3px 6px #151824, -3px -3px 6px #2b3242;
+      transform: translateX(20px);
+    }
+
+    .layout { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1.45fr); gap: 20px; }
+    @media (max-width: 900px) {
+      body { padding: 16px; }
+      .app-shell { border-radius: 26px; padding: 18px; }
+      .layout { grid-template-columns: 1fr; }
+    }
+
+    .card {
+      background: var(--card);
+      border-radius: 26px;
+      box-shadow: var(--shadow-out);
+      padding: 18px 18px 16px;
+      transition: box-shadow 0.25s ease, transform 0.15s ease;
+    }
+    .card:hover { transform: translateY(-1px); }
+    .card-title-row {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 10px;
+    }
+    .card-title-main { font-size: 14px; font-weight: 600; }
+    .chip-soft {
+      padding: 3px 10px; border-radius: 999px;
+      background: var(--accent-soft); color: var(--accent);
+      font-size: 11px;
+    }
+
+    form {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px 16px;
+      margin-top: 4px;
+    }
+    .field { display: flex; flex-direction: column; font-size: 12px; color: var(--text-soft); }
+    .field label { margin-bottom: 3px; }
+    input, select {
+      border: none; outline: none;
+      padding: 8px 10px;
+      border-radius: 18px;
+      background: var(--card);
+      box-shadow: var(--shadow-inset);
+      font-size: 13px; color: var(--text-main);
+      transition: box-shadow 0.2s ease, background 0.2s ease, transform 0.1s ease;
+    }
+    input:focus, select:focus {
+      box-shadow: inset 3px 3px 6px rgba(0,0,0,0.1), inset -3px -3px 6px rgba(255,255,255,0.7);
+      transform: translateY(-0.5px);
+    }
+    .full-span { grid-column: 1 / -1; }
+
+    .buttons-row {
+      grid-column: 1 / -1;
+      display: flex; flex-wrap: wrap; gap: 8px;
+      margin-top: 4px;
+    }
+    .btn {
+      border: none; outline: none; cursor: pointer;
+      padding: 8px 14px;
+      border-radius: 999px;
+      font-size: 12px;
+      display: inline-flex; align-items: center; gap: 6px;
+      transition: transform 0.08s ease, box-shadow 0.15s ease, background 0.15s ease;
+      white-space: nowrap;
+    }
+    .btn-primary {
+      background: linear-gradient(145deg, #8fdd94, #4CAF50);
+      color: #ffffff;
+      box-shadow: 5px 5px 10px #c2c7d1, -4px -4px 9px #ffffff;
+    }
+    .btn-secondary {
+      background: var(--card);
+      color: var(--text-soft);
+      box-shadow: var(--shadow-out);
+    }
+    .btn:hover { transform: translateY(-1px); }
+    .btn:active { transform: translateY(0); box-shadow: var(--shadow-inset); }
+    .btn-icon-dot {
+      width: 6px; height: 6px; border-radius: 50%; background: #ffffff;
+    }
+
+    /* Panel derecho */
+    .filters-row {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 8px;
+      gap: 8px;
+    }
+    .filters-row-left { display: flex; align-items: center; gap: 10px; }
+    .badge-pill {
+      padding: 4px 10px; border-radius: 999px;
+      background: var(--card); box-shadow: var(--shadow-inset);
+      font-size: 11px; color: var(--text-soft);
+    }
+    .filter-select {
+      min-width: 130px;
+    }
+
+    .kpi-row {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0,1fr));
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .kpi-card {
+      border-radius: 18px;
+      background: var(--card);
+      box-shadow: var(--shadow-inset);
+      padding: 8px 10px;
+      font-size: 11px;
+      display: flex; flex-direction: column; gap: 2px;
+      transition: transform 0.12s ease, box-shadow 0.2s ease;
+    }
+    .kpi-label { color: var(--text-soft); }
+    .kpi-value { font-size: 13px; font-weight: 600; }
+    .kpi-area { font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; }
+    .kpi-card:hover { transform: translateY(-1px); }
+
+    .history-table-wrapper {
+      border-radius: 20px;
+      background: var(--card);
+      box-shadow: var(--shadow-inset);
+      max-height: 280px;
+      overflow: auto;
+      padding: 6px;
+    }
+    table { width: 100%; border-collapse: collapse; font-size: 11px; }
+    thead { position: sticky; top: 0; background: var(--card); z-index: 1; }
+    th, td { padding: 5px 6px; text-align: left; white-space: nowrap; }
+    th { color: var(--text-soft); border-bottom: 1px solid rgba(180,187,199,0.7); }
+    tr + tr td { border-top: 1px solid rgba(224,229,236,0.3); }
+    .empty-placeholder {
+      padding: 14px 4px;
+      text-align: center;
+      color: var(--text-soft);
+    }
+    .tag-op {
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 10px;
+      background: #ffffffcc;
+    }
+    .tag-solicitud { color: #e67e22; }
+    .tag-devolucion { color: #0984e3; }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="app-header">
+      <div class="brand">
+        <div class="brand-logo"></div>
+        <div>
+          <div class="brand-title">Préstamos internos</div>
+          <div class="brand-sub">Tesorería · Inversiones</div>
+        </div>
+      </div>
+      <div class="header-right">
+        <div class="pill">
+          <span class="pill-dot"></span>
+          <span>Base en SharePoint / Excel</span>
+        </div>
+        <div class="pill" id="userStatus">Offline · Sesión local</div>
+        <div class="toggle-dark" id="toggleDark">
+          <div class="toggle-knob"></div>
+        </div>
+      </div>
+    </header>
+
+    <div class="layout">
+      <!-- Formulario -->
+      <section class="card">
+        <div class="card-title-row">
+          <div class="card-title-main">Registrar operación</div>
+          <div class="chip-soft">Neumorphism · Modo claro/oscuro</div>
+        </div>
+        <form id="loanForm" onsubmit="return false;">
+          <div class="field">
+            <label>Tipo de operación</label>
+            <select id="tipo">
+              <option>Solicitud de préstamo</option>
+              <option>Devolución</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Fecha de solicitud</label>
+            <input type="date" id="fechaSolicitud" />
+          </div>
+          <div class="field">
+            <label>Compañía</label>
+            <select id="compania">
+              <option>LBC</option>
+              <option>LBP</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Área que ejecuta</label>
+            <select id="area">
+              <option>Tesorería</option>
+              <option>Inversiones</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Moneda</label>
+            <select id="moneda">
+              <option>BOB</option>
+              <option>USD</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Monto</label>
+            <input type="text" id="monto" placeholder="1,234.56" />
+          </div>
+          <div class="field">
+            <label>Aprobado por</label>
+            <input type="text" id="aprobado" />
+          </div>
+          <div class="field">
+            <label>Responsable</label>
+            <input type="text" id="responsable" />
+          </div>
+          <div class="field full-span">
+            <label>Referencia / Notas</label>
+            <input type="text" id="referencia" />
+          </div>
+          <div class="buttons-row">
+            <button type="button" class="btn btn-primary" onclick="saveData()">
+              <span class="btn-icon-dot"></span> Guardar operación
+            </button>
+            <button type="button" class="btn btn-secondary" onclick="exportCsv()">
+              Exportar a Excel (CSV)
+            </button>
+            <button type="button" class="btn btn-secondary" onclick="loadFromFile()">
+              Importar base local
+            </button>
+            <button type="button" class="btn btn-secondary" onclick="saveToFile()">
+              Exportar base local
+            </button>
+          </div>
+        </form>
+      </section>
+
+      <!-- Panel derecho: filtros, KPIs, historial -->
+      <section class="card">
+        <div class="filters-row">
+          <div class="filters-row-left">
+            <div class="badge-pill" id="badgeCount">0 registros</div>
+            <div class="badge-pill" id="badgeMoneda">Moneda: Todas</div>
+          </div>
+          <select id="filtroArea" class="filter-select" onchange="applyFilters()">
+            <option value="todas">Todas las áreas</option>
+            <option value="Tesorería">Tesorería</option>
+            <option value="Inversiones">Inversiones</option>
+          </select>
+        </div>
+
+        <div class="kpi-row">
+          <div class="kpi-card">
+            <div class="kpi-label">Saldo neto Tesorería</div>
+            <div class="kpi-value" id="kpiTesoreria">0.00</div>
+            <div class="kpi-area">TESORERÍA</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Saldo neto Inversiones</div>
+            <div class="kpi-value" id="kpiInversiones">0.00</div>
+            <div class="kpi-area">INVERSIONES</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Saldo total sistema</div>
+            <div class="kpi-value" id="kpiTotal">0.00</div>
+            <div class="kpi-area">NETO</div>
+          </div>
+        </div>
+
+        <div class="history-table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Tipo</th>
+                <th>Fecha</th>
+                <th>Compañía</th>
+                <th>Área</th>
+                <th>Moneda</th>
+                <th>Monto</th>
+                <th>Aprobado</th>
+                <th>Responsable</th>
+                <th>Ref</th>
+              </tr>
+            </thead>
+            <tbody id="historialBody">
+              <tr><td colspan="9" class="empty-placeholder">Sin registros aún</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
